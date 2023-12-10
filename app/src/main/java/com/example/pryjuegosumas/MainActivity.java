@@ -1,6 +1,8 @@
 package com.example.pryjuegosumas;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.HashSet;
 import java.util.Random;
 
 import android.media.MediaPlayer;
@@ -13,20 +15,25 @@ import android.media.MediaPlayer;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView tvNum1, tvNum2;
+    private TextView tvNum1, tvNum2, tvGanar, tvSuma;
     private ImageView imgDos, imgTres, imgCuatro, imgCinco, imgSeis, imgSiete, imgOcho, imgNueve, imgDiez;
     private int resultadoCorrecto;
     private int intentos = 0;
     private MediaPlayer mediaPlayer;
+    private HashSet<String> sumasGeneradas = new HashSet<>();
+    private boolean[] imagenSeleccionada = new boolean[9];
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mediaPlayer = MediaPlayer.create(this, R.raw.themepk);
         mediaPlayer.start();
-        // Inicializar vistas
+
         tvNum1 = findViewById(R.id.tv_num1);
         tvNum2 = findViewById(R.id.tv_num2);
+        tvSuma = findViewById(R.id.tv_suma);
+        tvGanar = findViewById(R.id.tv_ganar);
         imgDos = findViewById(R.id.img_dos);
         imgTres = findViewById(R.id.img_tres);
         imgCuatro = findViewById(R.id.img_cuatro);
@@ -37,21 +44,17 @@ public class MainActivity extends AppCompatActivity {
         imgNueve = findViewById(R.id.img_nueve);
         imgDiez = findViewById(R.id.img_diez);
 
-        // Asignar valores a las imágenes
-        imgDos.setContentDescription("2");
-        imgTres.setContentDescription("3");
-        imgCuatro.setContentDescription("4");
-        imgCinco.setContentDescription("5");
-        imgSeis.setContentDescription("6");
-        imgSiete.setContentDescription("7");
-        imgOcho.setContentDescription("8");
-        imgNueve.setContentDescription("9");
-        imgDiez.setContentDescription("10");
+        imgDos.setTag("2");
+        imgTres.setTag("3");
+        imgCuatro.setTag("4");
+        imgCinco.setTag("5");
+        imgSeis.setTag("6");
+        imgSiete.setTag("7");
+        imgOcho.setTag("8");
+        imgNueve.setTag("9");
+        imgDiez.setTag("10");
 
-        // Generar la primera suma
         generarSuma();
-
-        // Configurar clics en las imágenes
         imgClic();
     }
 
@@ -59,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        // Asegurarse de liberar el MediaPlayer cuando la actividad se destruye
         if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.release();
@@ -68,49 +70,49 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void generarSuma() {
-        Random random = new Random();
-        int num1 = random.nextInt(9) + 1;  // Números del 2 al 10
-        int num2 = 1;  // Números del 1 al 9
-        resultadoCorrecto = num1 + num2;
+        if(sumasGeneradas.size() == 9) {
+            tvNum1.setVisibility(View.GONE);
+            tvNum2.setVisibility(View.GONE);
+            tvSuma.setVisibility(View.GONE);
+            tvGanar.setText("¡Has Ganado!");
+            return;
+        }
 
-        // Mostrar los términos de la suma
+        Random r = new Random();
+        int num1 = r.nextInt(9) + 1;
+        int num2 = 1;
+        String suma = num1 + "+" + num2;
+
+        while(sumasGeneradas.contains(suma)) {
+            num1 = r.nextInt(9) + 1;
+            num2 = 1;
+            suma = num1 + "+" + num2;
+        }
+
+        sumasGeneradas.add(suma);
+        resultadoCorrecto = num1 + num2;
         tvNum1.setText(String.valueOf(num1));
         tvNum2.setText(String.valueOf(num2));
     }
-
 
     private void imgClic() {
         View.OnClickListener clicImagen = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ImageView imageView = (ImageView) v;
-                CharSequence contentDescription = imageView.getContentDescription();
-
-                if (contentDescription != null) {
-                    int respuestaUsuario = Integer.parseInt(contentDescription.toString());
-
-                    // Verificar si la respuesta es correcta
-                    if (respuestaUsuario == resultadoCorrecto) {
-                        // Respuesta correcta, generar la siguiente suma
-                        generarSuma();
-                        intentos++;
-                    } else {
-                        // Respuesta incorrecta, puedes manejar esto de acuerdo a tus necesidades
-                        // Por ejemplo, mostrar un mensaje al usuario
-                        Toast.makeText(MainActivity.this, "Respuesta incorrecta", Toast.LENGTH_SHORT).show();
-                    }
-
-                    // Si se han realizado los 9 intentos, puedes manejarlo según tus requerimientos
-                    if (intentos == 9) {
-                        // Por ejemplo, mostrar un mensaje de éxito o redirigir a otra actividad
-                    }
+                int tag = Integer.parseInt(v.getTag().toString());
+                if(imagenSeleccionada[tag-2]) {
+                    return;
+                }
+                if(tag == resultadoCorrecto) {
+                    ((ImageView)v).setImageResource(R.drawable.pkball);
+                    imagenSeleccionada[tag-2] = true;
+                    generarSuma(); // Generar una nueva suma después de seleccionar la respuesta correcta
                 } else {
-                    Toast.makeText(MainActivity.this, "La imagen no tiene una descripción de contenido", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Respuesta incorrecta", Toast.LENGTH_SHORT).show();
                 }
             }
         };
 
-        // Asignar el mismo clicListener a todas las imágenes
         imgDos.setOnClickListener(clicImagen);
         imgTres.setOnClickListener(clicImagen);
         imgCuatro.setOnClickListener(clicImagen);
