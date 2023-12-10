@@ -25,7 +25,7 @@ public class SplashScreen extends AppCompatActivity {
         btnIniciar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(SplashScreen.this, MainActivity.class));
+                startActivity(new Intent(SplashScreen.this, PantallaCarga.class));
                 finish();
 
                 // Detener la música cuando se inicia la MainActivity
