@@ -26,4 +26,34 @@ public class PantallaCarga extends AppCompatActivity {
             }
         },9000);
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Asegurarse de liberar el MediaPlayer cuando la actividad se destruye
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // Detener la música cuando la aplicación se ejecuta en segundo plano
+        if (mediaPlayer != null) {
+            mediaPlayer.pause();
+        }
+    }@Override
+    protected void onResume() {
+        super.onResume();
+
+        // Reanudar la música cuando la aplicación vuelve a primer plano
+        if (mediaPlayer != null) {
+            mediaPlayer.start();
+        }
+    }
 }

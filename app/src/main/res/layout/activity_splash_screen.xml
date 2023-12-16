@@ -3,40 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:background="@drawable/fondopokemon"
+    android:background="@drawable/bgbpokemon"
     android:layout_height="match_parent"
     tools:context=".SplashScreen">
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="425dp"
-        android:layout_height="186dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.251"
-        app:srcCompat="@drawable/pokesumas" />
-
-    <ImageView
-        android:id="@+id/btn_iniciar"
-        android:layout_width="344dp"
-        android:layout_height="173dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.492"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.516"
-        app:srcCompat="@drawable/boton" />
-
     <TextView
         android:id="@+id/tv_iniciar"
-        android:layout_width="267dp"
-        android:layout_height="55dp"
+        android:layout_width="261dp"
+        android:layout_height="51dp"
         android:ems="10"
         android:fontFamily="@font/juego"
         android:inputType="text"
+        android:gravity="center"
         android:text="INICIAR"
         android:textColor="#FFFFFF"
         android:textSize="35dp"
@@ -44,7 +22,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.526" />
+        app:layout_constraintVertical_bias="0.517" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="391dp"
+        android:layout_height="298dp"
+        app:srcCompat="@drawable/pokesumas"
+        tools:layout_editor_absoluteX="10dp"
+        tools:layout_editor_absoluteY="54dp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

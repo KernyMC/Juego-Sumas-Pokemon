@@ -5,35 +5,47 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.HashSet;
 import java.util.Random;
 
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.os.Handler;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.media.MediaPlayer;
-
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import androidx.core.app.NotificationCompat;
 public class MainActivity extends AppCompatActivity {
 
-    private TextView tvNum1, tvNum2, tvGanar, tvSuma;
+    private TextView tvNum1, tvNum2, tvGanar, tvSuma, tvTiempo;
     private ImageView imgDos, imgTres, imgCuatro, imgCinco, imgSeis, imgSiete, imgOcho, imgNueve, imgDiez;
     private int resultadoCorrecto;
     private int intentos = 0;
     private MediaPlayer mediaPlayer;
     private HashSet<String> sumasGeneradas = new HashSet<>();
     private boolean[] imagenSeleccionada = new boolean[9];
+    private int[] musicArray = {R.raw.themepk, R.raw.rgpokemon}; // Array con los dos archivos de música
 
+    private CountDownTimer countDownTimer;
+    private long timeElapsed = 0;
+    private String finalTime;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mediaPlayer = MediaPlayer.create(this, R.raw.themepk);
+        Random random = new Random();
+        int randomMusic = musicArray[random.nextInt(musicArray.length)];
+        mediaPlayer = MediaPlayer.create(this, randomMusic);
         mediaPlayer.start();
 
         tvNum1 = findViewById(R.id.tv_num1);
         tvNum2 = findViewById(R.id.tv_num2);
         tvSuma = findViewById(R.id.tv_suma);
         tvGanar = findViewById(R.id.tv_ganar);
+        tvTiempo = findViewById(R.id.tv_tiempo);
         imgDos = findViewById(R.id.img_dos);
         imgTres = findViewById(R.id.img_tres);
         imgCuatro = findViewById(R.id.img_cuatro);
@@ -54,9 +66,39 @@ public class MainActivity extends AppCompatActivity {
         imgNueve.setTag("9");
         imgDiez.setTag("10");
 
+
         generarSuma();
         imgClic();
+
+        countDownTimer = new CountDownTimer(Long.MAX_VALUE, 1000) {
+            public void onTick(long millisUntilFinished) {
+                timeElapsed += 1000; // Incrementa el tiempo transcurrido en 1 segundo
+                int seconds = (int) (timeElapsed / 1000) % 60;
+                int minutes = (int) ((timeElapsed / (1000 * 60)) % 60);
+                int hours = (int) ((timeElapsed / (1000 * 60 * 60)) % 24);
+                tvTiempo.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
+            }
+
+            public void onFinish() {
+                // No necesitamos hacer nada aquí
+            }
+        }.start();
+
+// Finalmente, en tu método generarSuma(), detén el temporizador cuando el usuario haya completado las 9 sumas
+        if(sumasGeneradas.size() == 9) {
+            tvNum1.setVisibility(View.GONE);
+            tvNum2.setVisibility(View.GONE);
+            tvSuma.setVisibility(View.GONE);
+            tvGanar.setText("¡Has Ganado!");
+            countDownTimer.cancel(); // Detén el temporizador
+            return;
+        }
+
+
     }
+
+
+
 
     @Override
     protected void onDestroy() {
@@ -68,13 +110,41 @@ public class MainActivity extends AppCompatActivity {
             mediaPlayer = null;
         }
     }
+private void showNotification() {
+    String CHANNEL_ID = "channel_id";
+    String CHANNEL_NAME = "channel_name";
 
+    NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
+    ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).createNotificationChannel(notificationChannel);
+
+    NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle("¡Felicidades!")
+            .setContentText("Has Ganado, eres todo un campeón")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+    ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(0, builder.build());
+
+    }
     private void generarSuma() {
         if(sumasGeneradas.size() == 9) {
             tvNum1.setVisibility(View.GONE);
             tvNum2.setVisibility(View.GONE);
             tvSuma.setVisibility(View.GONE);
             tvGanar.setText("¡Has Ganado!");
+            countDownTimer.cancel();
+            finalTime = tvTiempo.getText().toString(); // Almacenar el tiempo final
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Intent intent = new Intent(MainActivity.this, PantallaFinal.class);
+                    intent.putExtra("Tiempo Final", finalTime); // Pasar el tiempo final a PantallaFinal
+                    startActivity(intent);
+                    finish();
+                }
+            }, 5000); // Retraso de 5 segundos
+
             return;
         }
 
@@ -122,5 +192,24 @@ public class MainActivity extends AppCompatActivity {
         imgOcho.setOnClickListener(clicImagen);
         imgNueve.setOnClickListener(clicImagen);
         imgDiez.setOnClickListener(clicImagen);
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // Detener la música cuando la aplicación se ejecuta en segundo plano
+        if (mediaPlayer != null) {
+            mediaPlayer.pause();
+        }
+    }@Override
+    protected void onResume() {
+        super.onResume();
+
+        // Reanudar la música cuando la aplicación vuelve a primer plano
+        if (mediaPlayer != null) {
+            mediaPlayer.start();
+        }
     }
 }
