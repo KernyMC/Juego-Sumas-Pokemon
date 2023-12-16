@@ -1,5 +1,6 @@
 package com.example.pryjuegosumas;
 
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
@@ -14,11 +15,17 @@ public class SumasVeinte extends AppCompatActivity {
     ImageView ultimoSeleccionado = null; // La última ImageView seleccionada
     int ultimoValor = -1; // El último valor seleccionado
     MediaPlayer flipSound; // Sonido de voltear la carta
+    int parejasEncontradas = 0; // Número de parejas encontradas
+    long tiempoInicio; // Tiempo de inicio
+    boolean isAnimating = false; // Flag to check if animation is in progress
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sumas_veinte);
+
+        // Registrar el tiempo de inicio
+        tiempoInicio = System.currentTimeMillis();
 
         // Crear MediaPlayer para el sonido de voltear la carta
         flipSound = MediaPlayer.create(this, R.raw.flipcard);
@@ -35,6 +42,11 @@ public class SumasVeinte extends AppCompatActivity {
             imagenes[i].setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    // If animation is in progress, return early
+                    if (isAnimating) {
+                        return;
+                    }
+
                     try {
                         // Reproducir el sonido de voltear la carta
                         flipSound.start();
@@ -53,7 +65,23 @@ public class SumasVeinte extends AppCompatActivity {
                             if (ultimoValor == valorSeleccionado) { // Si los valores son iguales
                                 ultimoSeleccionado.setVisibility(View.INVISIBLE); // Hacerlas invisibles
                                 seleccionado.setVisibility(View.INVISIBLE);
+                                parejasEncontradas++; // Incrementar el número de parejas encontradas
+
+                                // Si todas las parejas han sido encontradas
+                                if (parejasEncontradas == 6) {
+                                    long tiempoFinal = System.currentTimeMillis(); // Registrar el tiempo de finalización
+                                    long tiempoTotal = tiempoFinal - tiempoInicio; // Calcular el tiempo total
+                                    tiempoTotal /= 1000; // Convertir a segundos
+
+                                    // Iniciar FinalCasino y pasar el tiempo total
+                                    Intent intent = new Intent(SumasVeinte.this, FinalCasino.class);
+                                    intent.putExtra("tiempoTotal", tiempoTotal);
+                                    startActivity(intent);
+                                }
                             } else { // Si los valores no son iguales
+                                // Set isAnimating to true
+                                isAnimating = true;
+
                                 // Cambiar las imágenes de nuevo a "detrascard.png" después de un corto retraso
                                 seleccionado.postDelayed(new Runnable() {
                                     @Override
@@ -61,8 +89,11 @@ public class SumasVeinte extends AppCompatActivity {
                                         ultimoSeleccionado.setImageResource(R.drawable.detrascard);
                                         seleccionado.setImageResource(R.drawable.detrascard);
                                         ultimoSeleccionado = null; // Restablecer para la próxima pareja
+
+                                        // Set isAnimating to false
+                                        isAnimating = false;
                                     }
-                                }, 800); // 1000 milisegundos de retraso
+                                }, 800); // 800 milisegundos de retraso
                             }
                         }
                     } catch (Exception e) {
