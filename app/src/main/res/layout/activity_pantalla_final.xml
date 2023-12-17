@@ -54,8 +54,8 @@
 
     <TextView
         android:id="@+id/tv_tiempo"
-        android:layout_width="196dp"
-        android:layout_height="102dp"
+        android:layout_width="337dp"
+        android:layout_height="93dp"
         android:fontFamily="@font/juego"
         android:gravity="center"
         android:textColor="@color/white"

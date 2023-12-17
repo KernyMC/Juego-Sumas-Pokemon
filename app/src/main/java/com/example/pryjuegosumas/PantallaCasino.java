@@ -22,6 +22,7 @@ public class PantallaCasino extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pantalla_casino);
 
+
         VideoView videoView = findViewById(R.id.videoView);
         Uri video = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.pikacasin);
         videoView.setVideoURI(video);

@@ -18,12 +18,14 @@ public class SumasVeinte extends AppCompatActivity {
     int parejasEncontradas = 0; // Número de parejas encontradas
     long tiempoInicio; // Tiempo de inicio
     boolean isAnimating = false; // Flag to check if animation is in progress
-
+    MediaPlayer mediaPlayer;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sumas_veinte);
-
+        mediaPlayer = MediaPlayer.create(this, R.raw.casino);
+        mediaPlayer.setLooping(false); // Configurar para que se repita
+        mediaPlayer.start(); // Iniciar la reproducción del sonido de fondo
         // Registrar el tiempo de inicio
         tiempoInicio = System.currentTimeMillis();
 

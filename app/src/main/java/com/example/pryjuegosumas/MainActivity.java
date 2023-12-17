@@ -10,6 +10,7 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -44,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         mediaPlayer.start();
 
         // Crear MediaPlayer para el sonido de pop
-        popSound = MediaPlayer.create(this, R.raw.pkpop);
+        popSound = MediaPlayer.create(this, R.raw.pkballcap);
 
         tvNum1 = findViewById(R.id.tv_num1);
         tvNum2 = findViewById(R.id.tv_num2);
@@ -175,7 +176,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Reproducir el sonido de pop
-                popSound.start();
+                if (popSound != null) {
+                    popSound.start();
+                } else {
+                    Log.e("MainActivity", "Pop sound media player is null");
+                }
 
                 int tag = Integer.parseInt(v.getTag().toString());
                 if(imagenSeleccionada[tag-2]) {
