@@ -5,11 +5,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.media.MediaPlayer;
-import android.os.Handler;
+import android.view.View;
+import android.widget.ImageView;
+
 
 public class PantallaCarga extends AppCompatActivity {
     private MediaPlayer mediaPlayer;
+    private ImageView btSaltar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -17,14 +19,20 @@ public class PantallaCarga extends AppCompatActivity {
         mediaPlayer = MediaPlayer.create(this, R.raw.james);
         mediaPlayer.start();
 
-        new Handler().postDelayed(new Runnable() {
+        ImageView btSaltar = findViewById(R.id.bt_saltar);
+        btSaltar.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void run() {
+            public void onClick(View v) {
+                if (mediaPlayer != null) {
+                    mediaPlayer.stop();
+                    mediaPlayer.release();
+                    mediaPlayer = null;
+                }
+
                 Intent intent = new Intent(PantallaCarga.this, MainActivity.class);
                 startActivity(intent);
-                finish();
             }
-        },9000);
+        });
     }
 
     @Override
@@ -33,27 +41,8 @@ public class PantallaCarga extends AppCompatActivity {
 
         // Asegurarse de liberar el MediaPlayer cuando la actividad se destruye
         if (mediaPlayer != null) {
-            mediaPlayer.stop();
             mediaPlayer.release();
             mediaPlayer = null;
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        // Detener la música cuando la aplicación se ejecuta en segundo plano
-        if (mediaPlayer != null) {
-            mediaPlayer.pause();
-        }
-    }@Override
-    protected void onResume() {
-        super.onResume();
-
-        // Reanudar la música cuando la aplicación vuelve a primer plano
-        if (mediaPlayer != null) {
-            mediaPlayer.start();
         }
     }
 }

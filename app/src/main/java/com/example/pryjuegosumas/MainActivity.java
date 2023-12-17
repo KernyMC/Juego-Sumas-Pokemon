@@ -14,17 +14,17 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.media.MediaPlayer;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import androidx.core.app.NotificationCompat;
+
 public class MainActivity extends AppCompatActivity {
 
     private TextView tvNum1, tvNum2, tvGanar, tvSuma, tvTiempo;
     private ImageView imgDos, imgTres, imgCuatro, imgCinco, imgSeis, imgSiete, imgOcho, imgNueve, imgDiez;
     private int resultadoCorrecto;
     private int intentos = 0;
-    private MediaPlayer mediaPlayer;
+    private MediaPlayer mediaPlayer, popSound; // Sonido de pop
     private HashSet<String> sumasGeneradas = new HashSet<>();
     private boolean[] imagenSeleccionada = new boolean[9];
     private int[] musicArray = {R.raw.themepk, R.raw.rgpokemon}; // Array con los dos archivos de música
@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private CountDownTimer countDownTimer;
     private long timeElapsed = 0;
     private String finalTime;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,7 +40,11 @@ public class MainActivity extends AppCompatActivity {
         Random random = new Random();
         int randomMusic = musicArray[random.nextInt(musicArray.length)];
         mediaPlayer = MediaPlayer.create(this, randomMusic);
+        mediaPlayer.setLooping(true);
         mediaPlayer.start();
+
+        // Crear MediaPlayer para el sonido de pop
+        popSound = MediaPlayer.create(this, R.raw.pkpop);
 
         tvNum1 = findViewById(R.id.tv_num1);
         tvNum2 = findViewById(R.id.tv_num2);
@@ -66,7 +71,6 @@ public class MainActivity extends AppCompatActivity {
         imgNueve.setTag("9");
         imgDiez.setTag("10");
 
-
         generarSuma();
         imgClic();
 
@@ -84,7 +88,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }.start();
 
-// Finalmente, en tu método generarSuma(), detén el temporizador cuando el usuario haya completado las 9 sumas
         if(sumasGeneradas.size() == 9) {
             tvNum1.setVisibility(View.GONE);
             tvNum2.setVisibility(View.GONE);
@@ -93,12 +96,7 @@ public class MainActivity extends AppCompatActivity {
             countDownTimer.cancel(); // Detén el temporizador
             return;
         }
-
-
     }
-
-
-
 
     @Override
     protected void onDestroy() {
@@ -109,23 +107,30 @@ public class MainActivity extends AppCompatActivity {
             mediaPlayer.release();
             mediaPlayer = null;
         }
+
+        if (popSound != null) {
+            popSound.release();
+            popSound = null;
+        }
     }
-private void showNotification() {
-    String CHANNEL_ID = "channel_id";
-    String CHANNEL_NAME = "channel_name";
 
-    NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
-    ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).createNotificationChannel(notificationChannel);
+    private void showNotification() {
+        String CHANNEL_ID = "channel_id";
+        String CHANNEL_NAME = "channel_name";
 
-    NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("¡Felicidades!")
-            .setContentText("Has Ganado, eres todo un campeón")
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+        NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
+        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).createNotificationChannel(notificationChannel);
 
-    ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(0, builder.build());
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setContentTitle("¡Felicidades!")
+                .setContentText("Has Ganado, eres todo un campeón")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(0, builder.build());
 
     }
+
     private void generarSuma() {
         if(sumasGeneradas.size() == 9) {
             tvNum1.setVisibility(View.GONE);
@@ -143,7 +148,7 @@ private void showNotification() {
                     startActivity(intent);
                     finish();
                 }
-            }, 5000); // Retraso de 5 segundos
+            }, 500); // Retraso de 5 segundos
 
             return;
         }
@@ -169,6 +174,9 @@ private void showNotification() {
         View.OnClickListener clicImagen = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Reproducir el sonido de pop
+                popSound.start();
+
                 int tag = Integer.parseInt(v.getTag().toString());
                 if(imagenSeleccionada[tag-2]) {
                     return;
@@ -194,7 +202,6 @@ private void showNotification() {
         imgDiez.setOnClickListener(clicImagen);
     }
 
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -203,7 +210,9 @@ private void showNotification() {
         if (mediaPlayer != null) {
             mediaPlayer.pause();
         }
-    }@Override
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
 
